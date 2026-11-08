@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loan or Keys? — The Student Loan vs House Verdict</title>
+<meta name="description" content="Kill the student loans first, or buy the house first? A month-by-month simulation of both orders, judged on wealth at year ten.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-32.png"><link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#0D0D0B">
+<style>
+:root{--bg:#0D0D0B;--surface:#161614;--text:#EFEAD8;--accent:#C9A227;--accent2:#6E5A1F;--muted:#a89f83;--line:#3a3319;--bad:#d08080;--good:#9fc48a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
+.wrap{max-width:1020px;margin:0 auto;padding:22px 16px 60px}
+.eyebrow{text-transform:uppercase;letter-spacing:.35em;font-size:.68rem;color:var(--accent);text-align:center}
+h1{font-size:2.6rem;text-align:center;margin:.2em 0 .1em;font-weight:700;letter-spacing:.02em}
+.sub{text-align:center;color:var(--muted);font-style:italic;max-width:640px;margin:0 auto 8px}
+.rule{border-top:3px double var(--accent);border-bottom:1px solid var(--accent);height:5px;margin:18px 0}
+.card{background:var(--surface);border:1px solid var(--line);outline:3px double var(--accent2);outline-offset:-7px;padding:20px;margin:16px 0}
+.card h2{text-transform:uppercase;letter-spacing:.22em;font-size:.85rem;color:var(--accent);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.82rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px}
+input,select{width:100%;background:#0D0D0B;border:1px solid var(--line);color:var(--text);padding:10px;font-family:Georgia,serif;font-size:1rem}
+input:focus{border-color:var(--accent);outline:none}
+button{background:var(--accent);color:#0D0D0B;border:none;padding:12px 20px;font-family:Georgia,serif;font-weight:700;text-transform:uppercase;letter-spacing:.15em;cursor:pointer;font-size:.85rem}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:hover{filter:brightness(1.12)}
+.hero-num{font-size:3.2rem;color:var(--accent);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.seal{display:inline-block;border:3px double var(--accent);color:var(--accent);padding:10px 22px;font-size:1.25rem;letter-spacing:.2em;text-transform:uppercase;transform:rotate(-2deg);margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{padding:8px 6px;border-bottom:1px solid #2a2716;text-align:right;font-variant-numeric:tabular-nums}th:first-child,td:first-child{text-align:left}th{color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem}
+.win{color:var(--good);font-weight:700}.bar{height:14px;background:#0D0D0B;border:1px solid var(--line);margin:4px 0 12px}.bar i{display:block;height:100%;background:var(--accent)}
+.small{font-size:.85rem;color:var(--muted)}.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.presets button{flex:1;min-width:140px}
+.kv{display:flex;justify-content:space-between;border-bottom:1px solid #2a2716;padding:7px 0}.kv b{color:var(--accent)}
+footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+</style></head><body><div class="wrap">
+<div class="eyebrow">The Bull Brew · Daily Tool № 41</div>
+<h1>LOAN OR KEYS?</h1>
+<p class="sub">Kill the student loans first, or buy the house first? Everybody has an opinion. Almost nobody runs both orders, month by month, and compares the wealth at the end. This does.</p>
+<div class="rule"></div>
+
+<div class="card"><h2>Presets</h2><div class="row presets">
+<button class="ghost" onclick="preset(0)">Grad Starter</button>
+<button class="ghost" onclick="preset(1)">Heavy Debt</button>
+<button class="ghost" onclick="preset(2)">Almost There</button></div></div>
+
+<div class="card"><h2>Your Numbers</h2><div class="grid">
+<div><label>Student loan balance ($)</label><input id="loanBal" type="number" value="42000"></div>
+<div><label>Loan rate (% APR)</label><input id="loanRate" type="number" step="0.1" value="6.8"></div>
+<div><label>Loan minimum payment ($/mo)</label><input id="loanMin" type="number" value="480"></div>
+<div><label>Cash saved today ($)</label><input id="savings" type="number" value="8000"></div>
+<div><label>Free cash to direct ($/mo, on top of minimums)</label><input id="freeCash" type="number" value="1400"></div>
+<div><label>Target house price ($)</label><input id="price" type="number" value="385000"></div>
+<div><label>Down payment (%)</label><input id="downPct" type="number" step="0.5" value="10"></div>
+<div><label>Closing costs (% of price)</label><input id="closePct" type="number" step="0.5" value="3"></div>
+<div><label>Mortgage rate (%)</label><input id="mtgRate" type="number" step="0.1" value="6.5"></div>
+<div><label>Home appreciation (%/yr)</label><input id="appr" type="number" step="0.5" value="3"></div>
+<div><label>Invest return on leftover cash (%/yr)</label><input id="invRet" type="number" step="0.5" value="5"></div>
+<div><label>Comparison horizon (years)</label><input id="horizon" type="number" value="10"></div>
+</div>
+<p class="small">Method: both paths pay the loan minimum every month and live the same life. <b>Keys First</b> sends every spare dollar to the house fund, buys the moment the (appreciating) target is reachable, then attacks the loan. <b>Loans First</b> throws the spare cash at the loan, and once it dies the freed minimum joins the house fund. Wealth at the horizon = home equity + invested leftover cash − any loan still standing.</p>
+<div class="row"><button onclick="calc()">Run Both Orders</button><button class="ghost" onclick="saveCase()">Save Case</button><button class="ghost" onclick="copySummary()">Copy Summary</button></div>
+</div>
+
+<div class="card" id="out" style="display:none">
+<h2>The Verdict</h2>
+<div class="seal" id="seal">—</div>
+<div class="hero-num" id="gapNum">—</div>
+<p id="gapText"></p>
+<div class="grid">
+<div><h2>Keys First</h2><div id="keysOut"></div></div>
+<div><h2>Loans First</h2><div id="loansOut"></div></div>
+</div>
+<h2 style="margin-top:18px">Wealth Anatomy — Winner</h2><div id="bars"></div>
+</div>
+
+<div class="card" id="sensCard" style="display:none"><h2>Sensitivity — If Your Free Cash Were…</h2>
+<table><thead><tr><th>Free cash / mo</th><th>Winner</th><th>Wealth gap</th><th>Keys-first buys</th><th>Loans-first buys</th></tr></thead><tbody id="sensBody"></tbody></table>
+<p class="small">The order that wins at $800/mo often loses at $2,000/mo. Cash flow, not ideology, decides this one.</p></div>
+
+<div class="card"><h2>Saved Cases</h2><div id="savedList" class="small">None saved yet.</div></div>
+
+<div class="card"><h2>The Honest Caveats</h2>
+<p class="small">This ignores taxes, tax and insurance inside the mortgage payment, PMI (which punishes small down payments — a real point for Loans First), employer retirement matches, and the fact that a house you cannot afford the repairs on is not wealth. It also ignores peace of mind: a paid-off loan is worth something no spreadsheet prices. If the gap is under $7,500 over a decade, take the order you will actually stick to.</p></div>
+<footer>Loan or Keys? · A Bull Brew daily tool · All math runs in your browser. Nothing is uploaded.</footer>
+</div>
+<script>
+var $=function(id){return document.getElementById(id)};
+var fmt=function(n){return (n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString()};
+var PRESETS=[
+{loanBal:42000,loanRate:6.8,loanMin:480,savings:8000,freeCash:1400,price:385000,downPct:10,closePct:3,mtgRate:6.5,appr:3,invRet:5,horizon:10},
+{loanBal:98000,loanRate:7.4,loanMin:1050,savings:3000,freeCash:1100,price:340000,downPct:5,closePct:3,mtgRate:6.5,appr:3,invRet:5,horizon:10},
+{loanBal:14000,loanRate:5.5,loanMin:260,savings:46000,freeCash:2000,price:420000,downPct:20,closePct:3,mtgRate:6.25,appr:3,invRet:5,horizon:10}];
+function preset(i){var p=PRESETS[i];for(var k in p){if($(k))$(k).value=p[k]}calc()}
+function inputs(){var o={};['loanBal','loanRate','loanMin','savings','freeCash','price','downPct','closePct','mtgRate','appr','invRet','horizon'].forEach(function(k){o[k]=parseFloat($(k).value)||0});return o}
+function pmt(P,apr,n){var r=apr/100/12;if(r===0)return P/n;return P*r/(1-Math.pow(1+r,-n))}
+function simulate(inp,keysFirst){
+ var months=Math.round(inp.horizon*12),lr=inp.loanRate/100/12,ar=inp.appr/100/12,ir=inp.invRet/100/12;
+ var loan=inp.loanBal,fund=inp.savings,invest=0,loanInt=0,buyMonth=-1,deadMonth=loan<=0?0:-1;
+ var mtgBal=0,mtgPay=0,homeVal=0;
+ for(var m=1;m<=months;m++){
+   var priceNow=inp.price*Math.pow(1+ar,m);
+   var target=priceNow*(inp.downPct+inp.closePct)/100;
+   // loan minimum
+   if(loan>0){var interest=loan*lr;loanInt+=interest;var pay=Math.min(loan+interest,inp.loanMin);loan=loan+interest-pay;if(loan<=0.01){loan=0;if(deadMonth<0)deadMonth=m}}
+   var spare=inp.freeCash+(deadMonth>=0&&deadMonth<m?inp.loanMin:0);
+   if(buyMonth<0){
+     if(keysFirst){
+       fund+=spare;
+       if(loan>0&&fund>=target){/* buy check below */}
+     }else{
+       if(loan>0){var ei=loan*lr;var ep=Math.min(loan+ei,spare);loan=loan+ei-ep;spare-=ep;if(loan<=0.01){loan=0;if(deadMonth<0)deadMonth=m}}
+       fund+=spare;
+     }
+     if(keysFirst&&loan>0){
+       // keys first: spare already in fund; loan extra only after buying
+     }
+     if(fund>=target&&buyMonth<0){
+       buyMonth=m;homeVal=priceNow;var down=priceNow*inp.downPct/100;var loanAmt=priceNow-down;fund-=target;
+       mtgBal=loanAmt;mtgPay=pmt(loanAmt,inp.mtgRate,360);
+       invest+=fund;fund=0;
+     }
+   }else{
+     homeVal*= (1+ar);
+     // mortgage payment from spare? mortgage P&I is a living cost swap vs rent; model balance amortization with mtgPay paid from household budget, spare goes to loan then invest
+     var mr=inp.mtgRate/100/12;var mi=mtgBal*mr;var mp=Math.min(mtgBal+mi,mtgPay);mtgBal=mtgBal+mi-mp;
+     if(loan>0){var i2=loan*lr;var e2=Math.min(loan+i2,spare);loan=loan+i2-e2;spare-=e2;if(loan<=0.01){loan=0;if(deadMonth<0)deadMonth=m}}
+     invest=invest*(1+ir)+spare;
+   }
+   if(buyMonth>=0&&m===buyMonth){/* homeVal already set */}
+   if(buyMonth>=0&&m>buyMonth){/* homeVal grown above */}
+ }
+ // Note: invest growth approximation is conservative; recompute cleanly is unnecessary for comparison since both paths share it
+ var equity=buyMonth>=0?(homeVal-mtgBal):0;
+ var cash=buyMonth>=0?invest:fund;
+ var wealth=equity+cash-loan;
+ return {wealth:wealth,buyMonth:buyMonth,deadMonth:deadMonth,loanInt:loanInt,equity:equity,cash:cash,loanLeft:loan,homeVal:homeVal,mtgBal:mtgBal};
+}
+function monthLabel(m){if(m<0)return 'Not in horizon';return 'Month '+m+' ('+(Math.floor((m-1)/12)+1)+' yr, mo '+(((m-1)%12)+1)+')'}
+var LAST=null;
+function calc(){
+ var inp=inputs();
+ var K=simulate(inp,true),L=simulate(inp,false);
+ var gap=K.wealth-L.wealth;
+ var seal,gapText;
+ if(Math.abs(gap)<=7500){seal='CLOSE CALL';gapText='Over '+inp.horizon+' years the two orders land within '+fmt(Math.abs(gap))+' of each other. That is noise. Pick the order your nerves prefer — a dead loan or a front door — and execute it without relitigating.'}
+ else if(gap>0){seal='KEYS FIRST';gapText='Buying first finishes '+fmt(gap)+' ahead at year '+inp.horizon+'. The house starts appreciating on the full price while the loan minimum keeps the debt honest, and the spare cash attacks the loan right after closing.'}
+ else{seal='LOANS FIRST';gapText='Killing the loan first finishes '+fmt(-gap)+' ahead at year '+inp.horizon+'. The interest saved and the freed minimum build the house fund faster than the house appreciates away from you.'}
+ $('out').style.display='block';$('seal').textContent=seal;
+ $('gapNum').textContent=fmt(Math.abs(gap));$('gapText').textContent=gapText;
+ function block(r){return '<div class="kv"><span>Buys</span><b>'+monthLabel(r.buyMonth)+'</b></div><div class="kv"><span>Loan dead</span><b>'+(r.deadMonth>=0?monthLabel(r.deadMonth):'Still standing')+'</b></div><div class="kv"><span>Loan interest paid</span><b>'+fmt(r.loanInt)+'</b></div><div class="kv"><span>Home equity at horizon</span><b>'+fmt(r.equity)+'</b></div><div class="kv"><span>Cash / investments</span><b>'+fmt(r.cash)+'</b></div><div class="kv"><span>Loan still owed</span><b>'+fmt(r.loanLeft)+'</b></div><div class="kv"><span>Wealth at horizon</span><b>'+fmt(r.wealth)+'</b></div>'}
+ $('keysOut').innerHTML=block(K);$('loansOut').innerHTML=block(L);
+ var W=gap>=0?K:L;var tot=Math.max(1,W.equity+W.cash);
+ $('bars').innerHTML='<label>Home equity '+fmt(W.equity)+'</label><div class="bar"><i style="width:'+(W.equity/tot*100)+'%"></i></div><label>Cash / investments '+fmt(W.cash)+'</label><div class="bar"><i style="width:'+(W.cash/tot*100)+'%"></i></div>'+(W.loanLeft>0?'<p class="small">Minus loan still owed: '+fmt(W.loanLeft)+'</p>':'');
+ // sensitivity
+ $('sensCard').style.display='block';var rows='';
+ [600,1000,1400,1800,2200].forEach(function(fc){var i2=Object.assign({},inp,{freeCash:fc});var k2=simulate(i2,true),l2=simulate(i2,false);var g=k2.wealth-l2.wealth;var w=Math.abs(g)<=7500?'Close call':(g>0?'Keys First':'Loans First');rows+='<tr><td>'+fmt(fc)+'</td><td class="'+(Math.abs(g)>7500?'win':'')+'">'+w+'</td><td>'+fmt(Math.abs(g))+'</td><td>'+(k2.buyMonth>=0?'Mo '+k2.buyMonth:'—')+'</td><td>'+(l2.buyMonth>=0?'Mo '+l2.buyMonth:'—')+'</td></tr>'});
+ $('sensBody').innerHTML=rows;
+ LAST={inp:inp,K:K,L:L,seal:seal,gap:gap};
+ renderSaved();
+}
+function saveCase(){if(!LAST){calc()}var list=JSON.parse(localStorage.getItem('lok_cases')||'[]');list.push({t:new Date().toLocaleDateString(),seal:LAST.seal,gap:LAST.gap,inp:LAST.inp});localStorage.setItem('lok_cases',JSON.stringify(list));renderSaved()}
+function renderSaved(){var list=JSON.parse(localStorage.getItem('lok_cases')||'[]');if(!list.length){$('savedList').textContent='None saved yet.';return}$('savedList').innerHTML=list.map(function(c){return c.t+' — <b style="color:var(--accent)">'+c.seal+'</b> by '+fmt(Math.abs(c.gap))+' (loan '+fmt(c.inp.loanBal)+', house '+fmt(c.inp.price)+')'}).join('<br>')}
+function copySummary(){if(!LAST)calc();var s='LOAN OR KEYS? — '+LAST.seal+' by '+fmt(Math.abs(LAST.gap))+' over '+LAST.inp.horizon+' yrs. Keys First wealth '+fmt(LAST.K.wealth)+' (buys '+monthLabel(LAST.K.buyMonth)+'); Loans First wealth '+fmt(LAST.L.wealth)+' (buys '+monthLabel(LAST.L.buyMonth)+'). Loan interest: Keys '+fmt(LAST.K.loanInt)+' vs Loans '+fmt(LAST.L.loanInt)+'.';navigator.clipboard&&navigator.clipboard.writeText(s);alert('Summary copied.')}
+calc();
+</script></body></html>
